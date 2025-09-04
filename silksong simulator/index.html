@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Silksong Simulator</title>
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    body {
+      background-color: #1b2838;
+      font-family: Arial, sans-serif;
+      color: #c7d5e0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px;
+      margin: 0;
+      gap: 20px;
+    }
+
+    .container {
+      background-color: #0e141b;
+      padding: 20px;
+      width: 500px;
+      border-radius: 5px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    select {
+      background-color: #1b2838;
+      color: #c7d5e0;
+      border: 1px solid #2a475e;
+      padding: 5px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .info-box {
+      background-color: #2a475e;
+      padding: 10px;
+      border-radius: 3px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    a {
+      color: #66c0f4;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .click-button {
+      background: linear-gradient(to bottom, #a4d007 5%, #6a8700 95%);
+      border: none;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 16px;
+      padding: 10px 20px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .click-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 10px #a4d007;
+    }
+
+    .counter {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #a4d007;
+    }
+
+    .pop {
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .store {
+      background-color: #0e141b;
+      padding: 20px;
+      width: 300px;
+      border-radius: 5px;
+      height: fit-content;
+    }
+
+    .upgrade {
+      background-color: #2a475e;
+      padding: 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .upgrade button {
+      background: linear-gradient(to bottom, #4c6b8a 5%, #2a475e 95%);
+      border: none;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 12px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.3s;
+    }
+
+    .upgrade button:active {
+      transform: scale(0.9);
+    }
+
+    .upgrade button:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+
+    .flash {
+      background: linear-gradient(to bottom, #66ff66 5%, #228b22 95%) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>FORMA DE PAGAMENTO</h2>
+    <label for="pagamento">Selecione uma forma de pagamento</label>
+    <select id="pagamento">
+        <option>PayPal</option>
+        <option>Boleto bancário</option>
+        <option>Boleto Flash</option>
+        <option>Pix</option>
+        <option>Visa (Brasil)</option>
+        <option>Mastercard (Brasil)</option>
+        <option>American Express (Brasil)</option>
+        <option>Pagseguro</option>
+        <option>Visa</option>
+        <option>MasterCard</option>
+        <option>JCB</option>
+        <option>Hipercard</option>
+        <option>Diner's Club (Brasil)</option>
+        <option>Visa Electron (Brasil)</option>
+    </select>
+
+    <div class="info-box">
+      Compras realizadas com essa forma de pagamento só podem ser reembolsadas para a Carteira Steam. 
+      <a href="#">Saiba mais</a>
+    </div>
+
+    <p>Caso o seu endereço de cobrança seja de uma região que não Brasil, 
+      <a href="#">altere a região da loja</a>.
+    </p>
+    <p>Você terá a chance de revisar o seu pedido antes de ser finalizado.</p>
+
+    <button class="click-button" id="clicker">Continuar</button>
+    <div class="counter" id="counter">Cliques: 0</div>
+  </div>
+
+  <div class="store">
+    <h2>Loja de Upgrades</h2>
+    <div class="upgrade">
+      <span>Mais uma cópia de Silksong +1 CPC (10 cliques)</span>
+      <button onclick="buyCPC(10,1,this)">Comprar</button>
+    </div>
+    <div class="upgrade">
+      <span>Silksong OST +5 CPC (50 cliques)</span>
+      <button onclick="buyCPC(50,5,this)">Comprar</button>
+    </div>
+    <div class="upgrade">
+      <span>Hollow Knight + Silksong +10 CPC (200 cliques)</span>
+      <button onclick="buyCPC(200,10,this)">Comprar</button>
+    </div>
+    <div class="upgrade">
+      <span>Crédito na Carteira Steam +1 CPS (100 cliques)</span>
+      <button onclick="buyCPS(100,1,this)">Comprar</button>
+    </div>
+    <div class="upgrade">
+      <span>Entrar em contato com a Team Cherry +5 CPS (500 cliques)</span>
+      <button onclick="buyCPS(500,5,this)">Comprar</button>
+    </div>
+  </div>
+
+  <script>
+    const button = document.getElementById('clicker');
+    const counter = document.getElementById('counter');
+    let clicks = 0;
+    let cpc = 1;
+    let cps = 0; 
+
+    button.addEventListener('click', () => {
+      clicks += cpc;
+      updateCounter();
+
+      counter.classList.remove('pop');
+      void counter.offsetWidth;
+      counter.classList.add('pop');
+    });
+
+    function updateCounter() {
+      counter.textContent = "Cliques: " + clicks;
+    }
+
+    function flashButton(btn) {
+      btn.classList.add("flash");
+      setTimeout(() => btn.classList.remove("flash"), 300);
+    }
+
+    function buyCPC(cost, bonus, btn) {
+      if (clicks >= cost) {
+        clicks -= cost;
+        cpc += bonus;
+        updateCounter();
+        flashButton(btn);
+      }
+    }
+
+    function buyCPS(cost, bonus, btn) {
+      if (clicks >= cost) {
+        clicks -= cost;
+        cps += bonus;
+        updateCounter();
+        flashButton(btn);
+      }
+    }
+
+    setInterval(() => {
+      if (cps > 0) {
+        clicks += cps;
+        updateCounter();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

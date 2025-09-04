@@ -108,6 +108,12 @@
       justify-content: space-between;
       align-items: center;
       font-size: 14px;
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+
+    .upgrade.hidden {
+      display: none;
     }
 
     .upgrade button {
@@ -133,6 +139,16 @@
     .flash {
       background: linear-gradient(to bottom, #66ff66 5%, #228b22 95%) !important;
     }
+
+    .reveal {
+      animation: revealPop 0.5s ease;
+    }
+
+    @keyframes revealPop {
+      0%   { transform: scale(0.5); opacity: 0; }
+      60%  { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -140,7 +156,7 @@
     <h2>FORMA DE PAGAMENTO</h2>
     <label for="pagamento">Selecione uma forma de pagamento</label>
     <select id="pagamento">
-        <option>PayPal</option>
+      <option>PayPal</option>
         <option>Boleto bancário</option>
         <option>Boleto Flash</option>
         <option>Pix</option>
@@ -171,35 +187,26 @@
   </div>
 
   <div class="store">
-    <h2>Loja de Upgrades</h2>
-    <div class="upgrade">
-      <span>Mais uma cópia de Silksong +1 CPC (10 cliques)</span>
-      <button onclick="buyCPC(10,1,this)">Comprar</button>
-    </div>
-    <div class="upgrade">
-      <span>Silksong OST +5 CPC (50 cliques)</span>
-      <button onclick="buyCPC(50,5,this)">Comprar</button>
-    </div>
-    <div class="upgrade">
-      <span>Hollow Knight + Silksong +10 CPC (200 cliques)</span>
-      <button onclick="buyCPC(200,10,this)">Comprar</button>
-    </div>
-    <div class="upgrade">
-      <span>Crédito na Carteira Steam +1 CPS (100 cliques)</span>
-      <button onclick="buyCPS(100,1,this)">Comprar</button>
-    </div>
-    <div class="upgrade">
-      <span>Entrar em contato com a Team Cherry +5 CPS (500 cliques)</span>
-      <button onclick="buyCPS(500,5,this)">Comprar</button>
-    </div>
+    <h2>Carrinho</h2>
+    <div id="upgrades"></div>
   </div>
 
   <script>
     const button = document.getElementById('clicker');
     const counter = document.getElementById('counter');
+    const upgradesDiv = document.getElementById('upgrades');
+
     let clicks = 0;
-    let cpc = 1;
+    let cpc = 1; 
     let cps = 0; 
+
+    let upgrades = [
+      { name: "Mais uma Cópia de Silksong", cost: 15, cpc: 0, cps: 0.1, multiplier: 1, discovered: true, revealed: true,  owned: 0},
+      { name: "OST de Silksong", cost: 100, cpc: 0, cps: 1, multiplier: 1, discovered: false, revealed: false,  owned: 0 },
+      { name: "Bundle Hollow Knight + Silksong", cost: 1100, cpc: 0, cps: 8, multiplier: 1, discovered: false, revealed: false,  owned: 0 },
+      { name: "Silksong na Microsoft Store", cost: 12000, cpc: 0, cps: 47, multiplier: 1, discovered: false, revealed: false,  owned: 0 },
+      { name: "Pelúcia da Hornet", cost: 130000, cpc: 0, cps: 260, multiplier: 1, discovered: false, revealed: false,  owned: 0 },
+    ];
 
     button.addEventListener('click', () => {
       clicks += cpc;
@@ -211,7 +218,11 @@
     });
 
     function updateCounter() {
-      counter.textContent = "Cliques: " + clicks;
+      counter.innerHTML = `
+  Cliques: ${Math.floor(clicks)}<br>
+  <small>CPS: ${cps.toFixed(1)}</small>
+`;
+      renderStore();
     }
 
     function flashButton(btn) {
@@ -219,22 +230,49 @@
       setTimeout(() => btn.classList.remove("flash"), 300);
     }
 
-    function buyCPC(cost, bonus, btn) {
-      if (clicks >= cost) {
-        clicks -= cost;
-        cpc += bonus;
+    function buyUpgrade(upg, btn) {
+      if (clicks >= upg.cost) {
+        clicks -= upg.cost;
+        if (upg.cpc) cpc += upg.cpc;
+        if (upg.cps) cps += upg.cps;
+        if (upg.multiplier && upg.multiplier !== 1) {
+          cpc = Math.ceil(cpc * upg.multiplier);
+        }
+        if (upg.special === "doubleCPS") {
+          cps *= 2;
+        }
+
+        upg.cost = Math.ceil(upg.cost * 1.15);
+        upg.discovered = true;
+        upg.owned++;
+
         updateCounter();
         flashButton(btn);
       }
     }
 
-    function buyCPS(cost, bonus, btn) {
-      if (clicks >= cost) {
-        clicks -= cost;
-        cps += bonus;
-        updateCounter();
-        flashButton(btn);
-      }
+    function renderStore() {
+      upgradesDiv.innerHTML = "";
+      upgrades.forEach((upg) => {
+        if (clicks >= upg.cost * 0.75 || upg.discovered) {
+          if (!upg.revealed) {
+            upg.revealed = true;
+          }
+          const div = document.createElement("div");
+          div.className = "upgrade";
+          if (upg.revealed && !upg.renderedOnce) {
+            div.classList.add("reveal");
+            upg.renderedOnce = true;
+          }
+          div.innerHTML = `
+              <span>${upg.name} (${upg.cost} cliques) — <strong>x${upg.owned}</strong></span>
+              <button ${clicks < upg.cost ? "disabled" : ""}>Comprar</button>
+            `;
+          const btn = div.querySelector("button");
+          btn.addEventListener("click", () => buyUpgrade(upg, btn));
+          upgradesDiv.appendChild(div);
+        }
+      });
     }
 
     setInterval(() => {
@@ -243,6 +281,8 @@
         updateCounter();
       }
     }, 1000);
+
+    renderStore();
   </script>
 </body>
 </html>
